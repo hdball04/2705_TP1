@@ -2,25 +2,25 @@
 #define __DUMBO_H__
 
 // les formes
-FormeCube* cube = NULL;
-FormeQuad* quad = NULL;
-FormeSphere* sphere = NULL;
-FormeCylindre* cylindre = NULL;
+FormeCube *cube = NULL;
+FormeQuad *quad = NULL;
+FormeSphere *sphere = NULL;
+FormeCylindre *cylindre = NULL;
 // (partie 1) Vous devez vous servir des quatre fonctions ci-dessous (*sans les modifier*) pour tracer tous les parties des objets.
 // affiche un cylindre de rayon 1.0 et de longueur 1.0, dont la base est centrée en (0,0,0)
-void afficherCylindre() { cylindre->afficher(); }
+void afficherCylindre( ) { cylindre->afficher(); }
 // affiche une sphère de rayon 1.0, centrée en (0,0,0)
-void afficherSphere() { sphere->afficher(); }
+void afficherSphere( ) { sphere->afficher(); }
 // affiche un cube d'arête 1.0, centrée en (0,0,0)
-void afficherCube() { cube->afficher(); }
+void afficherCube( ) { cube->afficher(); }
 // affiche un quad d'arête 1
-void afficherQuad() { quad->afficher(); }
+void afficherQuad( ) { quad->afficher(); }
 
 // affiche la position courante du repère (pour débogage)
-void afficherRepereCourant(int num = 0)
+void afficherRepereCourant( int num = 0 )
 {
-    glUniformMatrix4fv(locmatrModel, 1, GL_FALSE, matrModel);
-    FenetreTP::afficherAxes(1.5, 3.0);
+    glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+    FenetreTP::afficherAxes( 1.5, 3.0 );
 }
 
 // partie 1: Dumbo
@@ -34,10 +34,10 @@ public:
         initialiserGraphique();
 
         // créer quelques autres formes
-        cube = new FormeCube(1.0, true);
-        quad = new FormeQuad(1.0, true);
-        sphere = new FormeSphere(1.0, 8, 8, true);
-        cylindre = new FormeCylindre(1.0, 1.0, 1.0, 16, 1, true);
+        cube = new FormeCube( 1.0, true );
+        quad = new FormeQuad( 1.0, true );
+        sphere = new FormeSphere( 1.0, 8, 8, true );
+        cylindre = new FormeCylindre( 1.0, 1.0, 1.0, 16, 1, true );
     }
     ~Dumbo()
     {
@@ -48,29 +48,29 @@ public:
         delete cylindre;
     }
 
-    void initVar() { position = glm::vec3(0.25 * Etat::dimBoite, 0.0, 0.0); taille = 1; angleCorps = 0.0; angleRotation = 70.0; }
+    void initVar() { position = glm::vec3(0.25*Etat::dimBoite, 0.0, 0.0); taille = 1; angleCorps = 0.0; angleRotation = 70.0; }
     void verifierAngles() // vérifier que les angles ne débordent pas les valeurs permises
     {
-        if (angleRotation > 90.0) angleRotation = 90.0; else if (angleRotation < 45.0) angleRotation = 45.0;
+        if ( angleRotation > 90.0 ) angleRotation = 90.0; else if ( angleRotation < 45.0 ) angleRotation = 45.0;
     }
 
     void initialiserGraphique()
     {
-        GLint prog = 0; glGetIntegerv(GL_CURRENT_PROGRAM, &prog);
-        if (prog <= 0)
+        GLint prog = 0; glGetIntegerv( GL_CURRENT_PROGRAM, &prog );
+        if ( prog <= 0 )
         {
             std::cerr << "Pas de programme actif!" << std::endl;
             locVertex = locColor = -1;
             return;
         }
-        if ((locVertex = glGetAttribLocation(prog, "Vertex")) == -1) std::cerr << "!!! pas trouvé la \"Location\" de Vertex" << std::endl;
-        if ((locColor = glGetAttribLocation(prog, "Color")) == -1) std::cerr << "!!! pas trouvé la \"Location\" de Color" << std::endl;
+        if ( ( locVertex = glGetAttribLocation( prog, "Vertex" ) ) == -1 ) std::cerr << "!!! pas trouvé la \"Location\" de Vertex" << std::endl;
+        if ( ( locColor = glGetAttribLocation( prog, "Color" ) ) == -1 ) std::cerr << "!!! pas trouvé la \"Location\" de Color" << std::endl;
 
         // allouer les objets OpenGL
-        glGenVertexArrays(1, &vao);
+        glGenVertexArrays( 1, &vao );
 
         // initialiser le VAO pour la théière
-        glBindVertexArray(vao);
+        glBindVertexArray( vao );
 
         // (partie 2) MODIFICATIONS ICI ...
         // créer le VBO pour les sommets
@@ -79,7 +79,9 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, vboTheiereSommets);
         //copier le tableau de sommets dans ce VBO
         glBufferData(GL_ARRAY_BUFFER, sizeof(gTheiereSommets), gTheiereSommets, GL_STATIC_DRAW);
+        // donner la structure du VBO qui contient les sommets
         glVertexAttribPointer(locVertex, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        // activer l'utilisation de ce VBO pour l’affichage
         glEnableVertexAttribArray(locVertex);
 
         // créer le VBO la connectivité
@@ -94,26 +96,26 @@ public:
 
     void conclureGraphique()
     {
-        glDeleteBuffers(1, &vboTheiereSommets);
-        glDeleteBuffers(1, &vboTheiereConnec);
+        glDeleteBuffers( 1, &vboTheiereSommets );
+        glDeleteBuffers( 1, &vboTheiereConnec );
     }
 
     // (partie 2) Vous modifierez cette fonction pour utiliser les VBO
     // affiche une théière, dont la base est centrée en (0,0,0)
     void afficherTheiere()
     {
-        glBindVertexArray(vao);
+        glBindVertexArray( vao );
         // (partie 2) MODIFICATIONS ICI ...
         glBindBuffer(GL_ARRAY_BUFFER, vboTheiereSommets); // sommets
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboTheiereConnec); // connectivité
         // tracer la primitive
         glDrawElements(GL_TRIANGLES, sizeof(gTheiereConnec) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
-
+        
         // vous pouvez utiliser temporairement cette fonction pour la première partie du TP, mais vous ferez mieux dans la seconde partie du TP
-        glBegin(GL_TRIANGLES);
-        for (unsigned int i = 0; i < sizeof(gTheiereConnec) / sizeof(GLuint); i++)
-            glVertex3fv(&(gTheiereSommets[3 * gTheiereConnec[i]]));
-        glEnd();
+        glBegin( GL_TRIANGLES );
+        for ( unsigned int i = 0 ; i < sizeof(gTheiereConnec)/sizeof(GLuint) ; i++ )
+            glVertex3fv( &(gTheiereSommets[3*gTheiereConnec[i]] ) );
+        glEnd( );
 
         glBindVertexArray(0);
     }
@@ -141,7 +143,7 @@ public:
         case 1: // la tête (cube)
             matrModel.PushMatrix(); {
                 matrModel.Rotate(angleCorps, 0, 1, 0);
-                matrModel.Translate(position.x - 1.5 * taille, position.y + taille, position.z); //postionner le bas de la tête à la moitié du corps
+                matrModel.Translate(position.x - 1.5*taille, position.y + taille, position.z); //postionner le bas de la tête à la moitié du corps
                 matrModel.Scale(taille, taille, taille);
 
                 glUniformMatrix4fv(locmatrModel, 1, GL_FALSE, matrModel);
@@ -152,10 +154,12 @@ public:
         case 2: // la théière
             matrModel.PushMatrix(); {
                 matrModel.Rotate(angleCorps, 0, 1, 0);
-                matrModel.Translate(position.x - 1.5 * taille, position.y + 1.5 * taille, position.z);
-                matrModel.Rotate(180, 1, 0, 0);
+                matrModel.Translate(position.x - 1.5 * taille, position.y + 1.5* taille, position.z); //postionner le bas de la tête à la moitié du corps
+                //inverser la théière selon x et z pour simuler une tête d'éléphant
+                matrModel.Rotate(180, 1, 0, 0); 
                 matrModel.Rotate(180, 0, 1, 0);
-                matrModel.Scale(0.25 * taille, 0.25 * taille, 0.25 * taille);
+
+                matrModel.Scale(0.25*taille, 0.25*taille, 0.25*taille);
                 glUniformMatrix4fv(locmatrModel, 1, GL_FALSE, matrModel);
                 afficherTheiere();
             }matrModel.PopMatrix(); glUniformMatrix4fv(locmatrModel, 1, GL_FALSE, matrModel);
@@ -166,8 +170,8 @@ public:
         glVertexAttrib3f(locColor, 0.4, 0.4, 0.4);  //gris 1
         matrModel.PushMatrix(); {
             matrModel.Rotate(angleCorps, 0, 1, 0);
-            matrModel.Translate(position.x, position.y + 0.5 * taille, position.z); // positionner le bas du corps à l'origine
-            matrModel.Scale(2 * taille, taille, taille);
+            matrModel.Translate(position.x, position.y +0.5*taille, position.z); // positionner le bas du corps à l'origine
+            matrModel.Scale(2*taille, taille, taille);
             glUniformMatrix4fv(locmatrModel, 1, GL_FALSE, matrModel);
             afficherCube();
         }matrModel.PopMatrix(); glUniformMatrix4fv(locmatrModel, 1, GL_FALSE, matrModel);
@@ -179,30 +183,30 @@ public:
     // - L'angle de rotation des oreilles est donné par la variable angleRotation.
     void afficherOreille()
     {
-        float hauteurOreille = (3.0 / 4.0 * taille) + 0.5 * taille; // 3/4 de la hauteur de la tête
-
+        float hauteurOreille = (3.0/4.0 * taille) + 0.5*taille; // 3/4 de la hauteur de la tête
+        
         // ajouter une ou des transformations afin de tracer des oreilles
         glVertexAttrib3f(locColor, 0.6, 0.6, 0.6); // gris 3
         matrModel.PushMatrix(); {
 
             // créer la première oreille
             matrModel.Rotate(angleCorps, 0, 1, 0);
-            matrModel.Translate(position.x - 2 * taille, position.y + hauteurOreille, position.z + 0.5 * taille);
-            matrModel.Rotate(180 - angleRotation, 1.0, 0.0, 0.0);
-            matrModel.Scale(taille, 3 * taille, taille);
+            matrModel.Translate(position.x - 2*taille, position.y+ hauteurOreille, position.z + 0.5*taille);
+            matrModel.Rotate(180-angleRotation, 1.0, 0.0, 0.0);
+            matrModel.Scale(taille, 3* taille, taille);
             //afficherRepereCourant( ); // débogage: montrer le repère à la position courante
             glUniformMatrix4fv(locmatrModel, 1, GL_FALSE, matrModel);
             afficherQuad();
 
         }matrModel.PopMatrix(); glUniformMatrix4fv(locmatrModel, 1, GL_FALSE, matrModel);
-
+        
         // créer la seconde oreille
         glVertexAttrib3f(locColor, 0.6, 0.6, 0.6); // gris 3
         matrModel.PushMatrix(); {
             matrModel.Rotate(angleCorps, 0, 1, 0);
             matrModel.Translate(position.x - 2 * taille, position.y + hauteurOreille, position.z - 0.5 * taille);
-            matrModel.Rotate(-(180 - angleRotation), 1.0, 0.0, 0.0);
-            matrModel.Scale(taille, 3 * taille, taille);
+            matrModel.Rotate(-(180 -angleRotation), 1.0, 0.0, 0.0);
+            matrModel.Scale(taille, 3*taille, taille);
             //afficherRepereCourant(); // débogage: montrer le repère à la position courante
             glUniformMatrix4fv(locmatrModel, 1, GL_FALSE, matrModel);
             afficherQuad();
@@ -219,25 +223,25 @@ public:
         glVertexAttrib3f(locColor, 0.5, 0.5, 0.5); // gris 2
 
         // ajouter une ou des transformations afin de tracer chacune des pattes
-        matrModel.PushMatrix(); {
+        matrModel.PushMatrix();{
             matrModel.Rotate(angleCorps, 0, 1, 0);
-            matrModel.Translate(position.x - taille, position.y, position.z + 0.5 * taille); // (bidon) À MODIFIER
-            matrModel.Rotate(90, 1.0, 0.0, 0.0);
+            matrModel.Translate(position.x - taille, position.y, position.z + 0.5*taille); // (bidon) À MODIFIER
+            matrModel.Rotate(90 ,1.0, 0.0, 0.0);
             matrModel.Rotate(-45, 1.0, 0.0, 0.0);
-            matrModel.Rotate(-(90 - angleRotation), 0.0, 1.0, 0.0);
+            matrModel.Rotate(-(90 -angleRotation), 0.0, 1.0, 0.0);
             matrModel.Scale(largMembre * taille, largMembre * taille, longMembre * taille);
 
             //afficherRepereCourant( ); // débogage: montrer le repère à la position courante
-            glUniformMatrix4fv(locmatrModel, 1, GL_FALSE, matrModel);
+            glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
             afficherCylindre();
         }matrModel.PopMatrix(); glUniformMatrix4fv(locmatrModel, 1, GL_FALSE, matrModel);
 
         matrModel.PushMatrix(); {
             matrModel.Rotate(angleCorps, 0, 1, 0);
-            matrModel.Translate(position.x - taille, position.y, position.z - 0.5 * taille); // (bidon) À MODIFIER
+            matrModel.Translate(position.x - taille, position.y , position.z - 0.5 * taille); // (bidon) À MODIFIER
             matrModel.Rotate(90, 1.0, 0.0, 0.0);
             matrModel.Rotate(45, 1.0, 0.0, 0.0);
-            matrModel.Rotate(-(90 - angleRotation), 0.0, 1.0, 0.0);
+            matrModel.Rotate(-(90-angleRotation), 0.0, 1.0, 0.0);
             matrModel.Scale(largMembre * taille, largMembre * taille, longMembre * taille);
 
             //afficherRepereCourant(); // débogage: montrer le repère à la position courante
@@ -247,24 +251,24 @@ public:
 
         matrModel.PushMatrix(); {
             matrModel.Rotate(angleCorps, 0, 1, 0);
-            matrModel.Translate(position.x + taille, position.y, position.z - 0.5 * taille);
+            matrModel.Translate(position.x + taille, position.y , position.z - 0.5 * taille);
             matrModel.Rotate(90, 1.0, 0.0, 0.0);
             matrModel.Rotate(45, 1.0, 0.0, 0.0);
-            matrModel.Rotate(90 - angleRotation, 0.0, 1.0, 0.0);
+            matrModel.Rotate(90-angleRotation, 0.0, 1.0, 0.0);
             matrModel.Scale(largMembre * taille, largMembre * taille, longMembre * taille);
-
+    
             //afficherRepereCourant(); // débogage: montrer le repère à la position courante
             glUniformMatrix4fv(locmatrModel, 1, GL_FALSE, matrModel);
             afficherCylindre();
         }matrModel.PopMatrix(); glUniformMatrix4fv(locmatrModel, 1, GL_FALSE, matrModel);
-
+        
         matrModel.PushMatrix(); {
             matrModel.Rotate(angleCorps, 0, 1, 0);
-            matrModel.Translate(position.x + taille, position.y, position.z + 0.5 * taille);
+            matrModel.Translate(position.x + taille, position.y , position.z + 0.5 * taille);
             matrModel.Rotate(90, 1.0, 0.0, 0.0);
             matrModel.Rotate(-45, 1.0, 0.0, 0.0);
-            matrModel.Rotate(90 - angleRotation, 0.0, 1.0, 0.0);
-            matrModel.Scale(largMembre * taille, largMembre * taille, longMembre * taille);
+            matrModel.Rotate(90-angleRotation, 0.0, 1.0, 0.0);
+            matrModel.Scale(largMembre*taille, largMembre*taille, longMembre*taille);
 
             //afficherRepereCourant(); // débogage: montrer le repère à la position courante
             glUniformMatrix4fv(locmatrModel, 1, GL_FALSE, matrModel);
@@ -275,7 +279,7 @@ public:
     void afficher()
     {
         // afficherRepereCourant( ); // débogage: montrer le repère à la position courante
-        matrModel.PushMatrix(); { // sauvegarder la transformation courante
+        matrModel.PushMatrix();{ // sauvegarder la transformation courante
 
             // ajouter une ou des transformations
             // Dumbo
@@ -292,42 +296,42 @@ public:
             // afficher les quatre pattes
             afficherPattes();
 
-        }matrModel.PopMatrix(); glUniformMatrix4fv(locmatrModel, 1, GL_FALSE, matrModel);
-        glUniformMatrix4fv(locmatrModel, 1, GL_FALSE, matrModel); // informer ...
+        }matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+        glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel ); // informer ...
     }
 
     void calculerPhysique()
     {
-        if (Etat::enmouvement)
+        if ( Etat::enmouvement )
         {
             static int sens[6] = { +1, +1, +1, +1, +1, +1 };
-            glm::vec3 vitesse(0.03, 0.02, 0.05);
+            glm::vec3 vitesse( 0.03, 0.02, 0.05 );
             // mouvement en X
-            if (position.x - taille <= -0.5 * Etat::dimBoite) sens[0] = +1;
-            else if (position.x + taille >= 0.5 * Etat::dimBoite) sens[0] = -1;
-            position.x += 60 * Etat::dt * vitesse.x * sens[0];
+            if ( position.x-taille <= -0.5*Etat::dimBoite ) sens[0] = +1;
+            else if ( position.x+taille >= 0.5*Etat::dimBoite ) sens[0] = -1;
+            position.x += 60*Etat::dt * vitesse.x * sens[0];
             // mouvement en Y
-            if (position.y - taille <= 0.0) sens[2] = +1;
-            else if (position.y + taille >= Etat::dimBoite) sens[2] = -1;
-            position.y += 60 * Etat::dt * vitesse.y * sens[2];
+            if ( position.y-taille <= 0.0 ) sens[2] = +1;
+            else if ( position.y+taille >= Etat::dimBoite ) sens[2] = -1;
+            position.y += 60*Etat::dt * vitesse.y * sens[2];
             // mouvement en Z
-            if (position.z - taille <= -0.5 * Etat::dimBoite) sens[1] = +1;
-            else if (position.z + taille >= 0.5 * Etat::dimBoite) sens[1] = -1;
-            position.z += 60 * Etat::dt * vitesse.z * sens[1];
+            if ( position.z-taille <= -0.5*Etat::dimBoite ) sens[1] = +1;
+            else if ( position.z+taille >= 0.5*Etat::dimBoite ) sens[1] = -1;
+            position.z += 60*Etat::dt * vitesse.z * sens[1];
 
             // rotation du corps
-            if (angleCorps > 360.0) angleCorps -= 360.0;
-            angleCorps += 60 * Etat::dt * 0.35;
+            if ( angleCorps > 360.0 ) angleCorps -= 360.0;
+            angleCorps += 60*Etat::dt * 0.35;
 
             // angle des pattes et des oreilles
-            if (angleRotation <= 45.0) sens[3] = +1;
-            else if (angleRotation >= 90.0) sens[3] = -1;
-            angleRotation += 60 * Etat::dt * 1.0 * sens[3];
+            if ( angleRotation <= 45.0 ) sens[3] = +1;
+            else if ( angleRotation >= 90.0 ) sens[3] = -1;
+            angleRotation += 60*Etat::dt * 1.0 * sens[3];
 
             // taille du corps
-            if (taille <= 0.25) sens[5] = +1;
-            else if (taille >= 1.0) sens[5] = -1;
-            taille += 60 * Etat::dt * 0.005 * sens[5];
+            if ( taille <= 0.25 ) sens[5] = +1;
+            else if ( taille >= 1.0 ) sens[5] = -1;
+            taille += 60*Etat::dt * 0.005 * sens[5];
         }
     }
 
